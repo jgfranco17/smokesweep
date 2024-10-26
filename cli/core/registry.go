@@ -1,4 +1,4 @@
-package runner
+package core
 
 import (
 	"github.com/sirupsen/logrus"

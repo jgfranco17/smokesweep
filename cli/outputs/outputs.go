@@ -2,14 +2,30 @@ package outputs
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fatih/color"
 )
 
-func PrintStandardMessage(source string, message string, args ...any) {
-	green := color.New(color.FgGreen).SprintFunc()
+func PrintColoredMessage(textColor string, source string, message string, args ...any) {
+	var selectedColor color.Attribute
+	switch strings.ToLower(textColor) {
+	case "green":
+		selectedColor = color.FgGreen
+	case "yellow":
+		selectedColor = color.FgYellow
+	case "red":
+		selectedColor = color.FgRed
+	case "blue":
+		selectedColor = color.FgBlue
+	case "cyan":
+		selectedColor = color.FgCyan
+	default:
+		selectedColor = color.FgWhite
+	}
+	colorFunc := color.New(selectedColor).SprintFunc()
 	fullMessage := fmt.Sprintf(message, args...)
-	fmt.Printf("[%s] %s\n", green(source), fullMessage)
+	fmt.Printf("[%s] %s\n", colorFunc(source), fullMessage)
 }
 
 func PrintWarn(text string, args ...any) {

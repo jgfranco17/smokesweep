@@ -1,7 +1,7 @@
 ---
-url: "https://api.example.com"
+url: "https://example.com"
 endpoints:
-  - path: "/healthz"
+  - path: "/"
     expected-status: 200
   - path: "/info"
     expected-status: 200

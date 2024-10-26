@@ -38,9 +38,3 @@ jobs:
           just tidy
           go mod download all
           CGO_ENABLED=0 GOOS=linux go build -o ./smokesweep main.go
-
-      - name: Upload binary
-        uses: actions/upload-artifact@v3
-        with:
-          name: smokesweep-binary
-          path: smokesweep

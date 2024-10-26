@@ -1,4 +1,4 @@
-package runner
+package core
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"cli/config"
-	"cli/outputs"
 )
 
 func GetRunCommand() *cobra.Command {
@@ -25,8 +24,8 @@ func GetRunCommand() *cobra.Command {
 				return fmt.Errorf("Error loading config file: %w", err)
 			}
 			log.Debugf("Using config file: %s", configFile)
-			outputs.PrintStandardMessage("TEST SUITE", "Running smoke test suite...")
-			log.Debugf("Target: %s", testConfigs.URL)
+			results := RunTests(testConfigs)
+			SummarizeResults(results)
 			return nil
 		},
 	}

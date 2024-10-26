@@ -12,12 +12,12 @@ import (
 )
 
 type TestResult struct {
-	Target           string
-	Duration         time.Duration
-	ExpectedDuration *time.Duration
-	HttpStatus       int
-	ExpectedStatus   int
-	Passed           bool
+	Target         string
+	Duration       time.Duration
+	Timeout        *time.Duration
+	HttpStatus     int
+	ExpectedStatus int
+	Passed         bool
 }
 
 type TestReport struct {
@@ -47,9 +47,9 @@ func RunTests(conf *config.TestConfig) []TestResult {
 			HttpStatus:     resp.StatusCode,
 			Passed:         resp.StatusCode == endpoint.ExpectedStatus,
 		}
-		if endpoint.MaxResponseTime != nil {
-			d := time.Duration(*endpoint.MaxResponseTime) * time.Millisecond
-			result.ExpectedDuration = &d
+		if endpoint.Timeout != nil {
+			d := time.Duration(*endpoint.Timeout) * time.Millisecond
+			result.Timeout = &d
 		}
 		results = append(results, result)
 	}
@@ -59,8 +59,8 @@ func RunTests(conf *config.TestConfig) []TestResult {
 func SummarizeResults(results []TestResult) {
 	for _, result := range results {
 		if result.Passed {
-			if result.ExpectedDuration != nil {
-				if !(result.Duration < *result.ExpectedDuration) {
+			if result.Timeout != nil {
+				if !(result.Duration < *result.Timeout) {
 					outputs.PrintColoredMessage("yellow", "SLOW", "%s (%vms) exceeded threshold", result.Target, result.Duration.Milliseconds())
 				}
 			}

@@ -5,4 +5,4 @@ endpoints:
     expected-status: 200
   - path: "/info"
     expected-status: 200
-    max-response-time-ms: 500
+    timeout-ms: 500

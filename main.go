@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"cli/core"
 	"cli/logging"
 )
 
@@ -19,9 +20,9 @@ func init() {
 
 func main() {
 	commandsList := []*cobra.Command{
-		commands.GetRunCommand(),
+		core.GetRunCommand(),
 	}
-	command := commands.NewCommandRegistry(projectName, projectDescription)
+	command := core.NewCommandRegistry(projectName, projectDescription)
 	command.RegisterCommands(commandsList)
 
 	err := command.Execute()

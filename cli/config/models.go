@@ -20,7 +20,7 @@ func (tc *TestConfig) Write(filePath string) error {
 }
 
 type Endpoint struct {
-	Path            string `yaml:"path"`
-	ExpectedStatus  int    `yaml:"expected-status"`
-	MaxResponseTime *int   `yaml:"max-response-time-ms,omitempty"`
+	Path           string `yaml:"path"`
+	ExpectedStatus int    `yaml:"expected-status"`
+	Timeout        *int   `yaml:"timeout-ms,omitempty"`
 }

@@ -81,3 +81,25 @@ func TestRunCommandInvalidConfig(t *testing.T) {
 	output := ExecuteTestCommand(GetRunCommand, "non-existent.yaml")
 	assert.ErrorContains(t, output.Error, "Error loading config file: open non-existent.yaml: no such file or directory")
 }
+
+func TestRunCommandFailFast(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+	endpoints := []config.Endpoint{
+		{Path: "/some-endpoint", ExpectedStatus: 200},
+	}
+	mockConfig := config.TestConfig{
+		URL:       server.URL,
+		Endpoints: endpoints,
+	}
+	temp := createTempDir(t)
+	defer os.RemoveAll(temp)
+	writePath := filepath.Join(temp, "config.yaml")
+	err := mockConfig.Write(writePath)
+	assert.NoError(t, err)
+
+	output := ExecuteTestCommand(GetRunCommand, writePath, "--fail-fast")
+	assert.ErrorContains(t, output.Error, "expected HTTP 200 but got 500")
+}

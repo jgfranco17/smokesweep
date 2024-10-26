@@ -25,7 +25,7 @@ type TestReport struct {
 	Results   []TestResult
 }
 
-func RunTests(conf *config.TestConfig) []TestResult {
+func RunTests(conf *config.TestConfig, failFast bool) ([]TestResult, error) {
 	var results []TestResult
 	fmt.Printf("Running %d tests [URL: %s]\n", len(conf.Endpoints), conf.URL)
 	fmt.Println("------------------------------")
@@ -37,9 +37,15 @@ func RunTests(conf *config.TestConfig) []TestResult {
 		duration := time.Since(start)
 		if err != nil {
 			outputs.PrintColoredMessage("red", "UNREACHABLE", "Failed to reach target %s", target)
+			if failFast {
+				return nil, fmt.Errorf("Failed to reach target %s: %w", target, err)
+			}
 			continue
 		}
 		defer resp.Body.Close()
+		if failFast && resp.StatusCode != endpoint.ExpectedStatus {
+			return nil, fmt.Errorf("Target %s expected HTTP %d but got %d", target, endpoint.ExpectedStatus, resp.StatusCode)
+		}
 		result := TestResult{
 			Target:         target,
 			Duration:       duration,
@@ -53,7 +59,7 @@ func RunTests(conf *config.TestConfig) []TestResult {
 		}
 		results = append(results, result)
 	}
-	return results
+	return results, nil
 }
 
 func SummarizeResults(results []TestResult) {

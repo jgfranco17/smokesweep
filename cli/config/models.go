@@ -16,8 +16,7 @@ func (tc *TestConfig) Write(filePath string) error {
 	if err != nil {
 		return err
 	}
-
-	return os.WriteFile(filePath, data, 0644) // Write with appropriate permissions
+	return os.WriteFile(filePath, data, 0644)
 }
 
 type Endpoint struct {

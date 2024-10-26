@@ -17,3 +17,10 @@ tidy:
     cd cli && go mod tidy
     go work sync
     @echo "{{ PROJECT_NAME }} workspace and modules synced successfully!"
+
+# Build the binary
+build:
+    @echo "Building {{ PROJECT_NAME }} binary..."
+    go mod download all
+    CGO_ENABLED=0 GOOS=linux go build -o ./smokesweep main.go
+    @echo "{{ PROJECT_NAME }} binary built successfully!"

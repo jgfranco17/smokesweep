@@ -24,3 +24,11 @@ build:
     go mod download all
     CGO_ENABLED=0 GOOS=linux go build -o ./smokesweep main.go
     @echo "{{ PROJECT_NAME }} binary built successfully!"
+
+# Build Docker image
+build-docker:
+    docker build -t smokesweep:dev .
+
+# Run CLI through Docker
+run-docker:
+    docker run --rm smokesweep:dev --version

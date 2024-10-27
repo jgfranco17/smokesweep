@@ -51,9 +51,9 @@ jobs:
 
       - name: Upload binary
         id: upload-binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: smokesweep
+          name: smokesweep-bin
           path: smokesweep
 
       - name: Create ${{ env.VERSION }} release

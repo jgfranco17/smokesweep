@@ -1,0 +1,13 @@
+{
+  "author": "Joaquin Franco",
+  "version": "0.0.1",
+  "repo": {
+    "host": "github",
+    "url": "https://github.com/jgfranco17/smokesweep"
+  },
+  "project": {
+    "name": "smokesweep",
+    "description": "Smoke test CLI for testing REST API services.",
+    "languages": ["Go"]
+  }
+}

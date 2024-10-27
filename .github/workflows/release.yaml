@@ -1,12 +1,11 @@
 name: Production Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        type: string
-        description: Semver version to release
-        required: true
+  push:
+    branches:
+      - main
+    paths:
+      - "info.json"
 
 jobs:
   verify:
@@ -14,21 +13,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10.4"
-
-      - name: Install poetry
-        shell: bash
-        run: |
-          pip install --upgrade pip
-          pip install poetry==1.8.3
-
-      - name: Install dependencies
-        run: |
-          poetry install
 
       - name: Run workspace setup
         uses: ./.github/actions/setup-workspace
@@ -51,7 +35,7 @@ jobs:
       - name: Set version
         id: set-version
         run: |
-          VERSION=${{ github.event.inputs.version }}
+          VERSION=$(jq -r .version info.json)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Install Github CLI
@@ -63,16 +47,16 @@ jobs:
         run: |
           just tidy
           go mod download all
-          CGO_ENABLED=0 GOOS=linux go build -o ./smokesweep main.go
+          CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=${VERSION}" -o ./smokesweep main.go
 
       - name: Upload binary
         id: upload-binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: smokesweep
           path: smokesweep
 
-      - name: Create release
+      - name: Create ${{ env.VERSION }} release
         env:
           GITHUB_TOKEN: ${{ secrets.USER_GITHUB_TOKEN }}
           VERSION: ${{ env.VERSION }}

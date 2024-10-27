@@ -13,6 +13,18 @@ var (
 	failFast bool
 )
 
+func GetVersionCommand(version string) *cobra.Command {
+	runCmd := &cobra.Command{
+		Use:  "version",
+		Args: cobra.ExactArgs(0),
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("smokesweep v%s\n", version)
+		},
+	}
+	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "f", false, "Stop executing tests on the first failure")
+	return runCmd
+}
+
 func GetRunCommand() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run",

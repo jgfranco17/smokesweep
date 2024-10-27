@@ -20,10 +20,12 @@ tidy:
 
 # Build the binary
 build:
-    @echo "Building {{ PROJECT_NAME }} binary..."
+    #!/usr/bin/env bash
+    echo "Building {{ PROJECT_NAME }} binary..."
     go mod download all
-    CGO_ENABLED=0 GOOS=linux go build -o ./smokesweep main.go
-    @echo "{{ PROJECT_NAME }} binary built successfully!"
+    VERSION=$(jq -r .version info.json)
+    CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=${VERSION}" -o ./smokesweep main.go
+    echo "Built binary for {{ PROJECT_NAME }} ${VERSION} successfully!"
 
 # Build Docker image
 build-docker:

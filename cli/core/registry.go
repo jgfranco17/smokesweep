@@ -15,10 +15,11 @@ type CommandRegistry struct {
 }
 
 // NewCommandRegistry creates a new instance of CommandRegistry
-func NewCommandRegistry(name string, description string) *CommandRegistry {
+func NewCommandRegistry(name string, description string, version string) *CommandRegistry {
 	root := &cobra.Command{
-		Use:   name,
-		Short: description,
+		Use:     name,
+		Version: version,
+		Short:   description,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			verbosity, _ := cmd.Flags().GetCount("verbose")
 			switch verbosity {
@@ -37,6 +38,7 @@ func NewCommandRegistry(name string, description string) *CommandRegistry {
 		rootCmd: root,
 	}
 	root.PersistentFlags().CountVarP(&newRegistry.verbosity, "verbose", "v", "Increase verbosity (-v or -vv)")
+	root.Flags().BoolP("version", "", false, "Print the version number of SmokeSweep")
 	return newRegistry
 }
 

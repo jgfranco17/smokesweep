@@ -9,8 +9,12 @@ import (
 )
 
 const (
-	projectName        string = "smokesweep"
-	projectDescription string = "Smoke test CLI utility for testing REST API services.\nDeveloped by Joaquin Franco."
+	projectName        = "smokesweep"
+	projectDescription = "SmokeSweep: A CLI tool for executing smoke tests on REST API services."
+)
+
+var (
+	version string = "0.0.0"
 )
 
 func init() {
@@ -20,9 +24,10 @@ func init() {
 
 func main() {
 	commandsList := []*cobra.Command{
+		core.GetVersionCommand(version),
 		core.GetRunCommand(),
 	}
-	command := core.NewCommandRegistry(projectName, projectDescription)
+	command := core.NewCommandRegistry(projectName, projectDescription, version)
 	command.RegisterCommands(commandsList)
 
 	err := command.Execute()

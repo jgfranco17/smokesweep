@@ -1,0 +1,80 @@
+name: Production Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Semver version to release
+        required: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10.4"
+
+      - name: Install poetry
+        shell: bash
+        run: |
+          pip install --upgrade pip
+          pip install poetry==1.8.3
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Run workspace setup
+        uses: ./.github/actions/setup-workspace
+
+      - name: Run tests
+        run: |
+          just test
+
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    needs: verify
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run setup
+        uses: ./.github/actions/setup-workspace
+
+      - name: Set version
+        id: set-version
+        run: |
+          VERSION=${{ github.event.inputs.version }}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Install Github CLI
+        run: |
+          sudo apt-get install gh
+
+      - name: Build binary
+        id: build-binary
+        run: |
+          just tidy
+          go mod download all
+          CGO_ENABLED=0 GOOS=linux go build -o ./smokesweep main.go
+
+      - name: Upload binary
+        id: upload-binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: smokesweep
+          path: smokesweep
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.USER_GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+        run: |
+          gh release create "${{ env.VERSION }}" --notes-file ".github/release/${{ env.VERSION }}.md" smokesweep

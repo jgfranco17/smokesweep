@@ -18,11 +18,11 @@ success or failure of each endpoint check.
 
 ## Installation
 
-### Prerequisites
-
-- Go (version 1.20 or later)
-
 ### Build from Source
+
+#### Prerequisites
+
+- [Golang](https://go.dev/doc/install) (version 1.21 or later)
 
 1. Clone the repository:
 
@@ -45,7 +45,7 @@ You can also download the latest release from the [releases page](https://github
 
 ### Configuration
 
-Create a YAML configuration file (e.g., `config.yaml`) with the following structure:
+Create a YAML configuration file (e.g. `config.yaml`) with the following structure:
 
 ```yaml
 Copy code
@@ -53,7 +53,7 @@ url: "https://api.example.com"
 endpoints:
   - path: "/users"
     expected-status: 200
-    max-response-time: 500
+    timeout-ms: 500
   - path: "/posts"
     expected-status: 200
 ```
@@ -66,9 +66,9 @@ To run SmokeSweep, use the following command:
 smokewweep run -vv ./config.yaml
 ```
 
-`run`: The command to execute the smoke tests.
-`-vvv`: Increases verbosity of the output for more detailed logs.
-`./config.yaml`: The path to your configuration file.
+- `run`: The command to execute the smoke tests.
+- `-vvv`: Increases verbosity of the output for more detailed logs.
+- `./config.yaml`: The path to your configuration file.
 
 The output will display the results of the smoke tests for each endpoint defined in the
 configuration file.

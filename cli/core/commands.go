@@ -41,11 +41,11 @@ func GetRunCommand() *cobra.Command {
 				return fmt.Errorf("Error loading config file: %w", err)
 			}
 			log.Debugf("Using config file: %s", configFile)
-			results, err := RunTests(testConfigs, failFast)
+			report, err := RunTests(testConfigs, failFast)
 			if err != nil {
 				return fmt.Errorf("Error running tests: %w", err)
 			}
-			SummarizeResults(results)
+			report.SummarizeResults()
 			return nil
 		},
 	}

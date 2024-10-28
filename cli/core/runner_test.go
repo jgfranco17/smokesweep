@@ -33,10 +33,10 @@ func TestRunTestsSuccess(t *testing.T) {
 		{Path: "/users", ExpectedStatus: 200},
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
-	results, err := RunTests(mockConfig, false)
+	report, err := RunTests(mockConfig, false)
 	assert.NoError(t, err)
-	assert.Equal(t, len(endpoints), len(results))
-	for i, result := range results {
+	assert.Equal(t, len(endpoints), len(report.Results))
+	for i, result := range report.Results {
 		assert.Contains(t, result.Target, endpoints[i].Path)
 		assert.True(t, result.Passed)
 	}
@@ -51,10 +51,10 @@ func TestRunTestsFailedCall(t *testing.T) {
 		{Path: "/users", ExpectedStatus: 200},
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
-	results, err := RunTests(mockConfig, false)
+	report, err := RunTests(mockConfig, false)
 	assert.NoError(t, err)
-	assert.Equal(t, len(endpoints), len(results))
-	for i, result := range results {
+	assert.Equal(t, len(endpoints), len(report.Results))
+	for i, result := range report.Results {
 		assert.Contains(t, result.Target, endpoints[i].Path)
 		assert.False(t, result.Passed)
 	}
@@ -69,9 +69,9 @@ func TestRunTestsFailFast(t *testing.T) {
 		{Path: "/users", ExpectedStatus: 200},
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
-	results, err := RunTests(mockConfig, true)
+	report, err := RunTests(mockConfig, true)
 	assert.Error(t, err)
-	assert.Nil(t, results)
+	assert.Nil(t, report.Results)
 }
 
 func TestRunTestsUnreachable(t *testing.T) {
@@ -79,9 +79,9 @@ func TestRunTestsUnreachable(t *testing.T) {
 		{Path: "/users", ExpectedStatus: http.StatusOK},
 	}
 	mockConfig := newMockConfig("my-server", endpoints)
-	results, err := RunTests(mockConfig, false)
+	report, err := RunTests(mockConfig, false)
 	assert.NoError(t, err)
-	for i, result := range results {
+	for i, result := range report.Results {
 		assert.Contains(t, result.Target, endpoints[i].Path)
 		assert.False(t, result.Passed)
 	}
@@ -92,7 +92,7 @@ func TestRunTestsUnreachableFailFast(t *testing.T) {
 		{Path: "/users", ExpectedStatus: http.StatusOK},
 	}
 	mockConfig := newMockConfig("my-server", endpoints)
-	results, err := RunTests(mockConfig, true)
+	report, err := RunTests(mockConfig, true)
 	assert.ErrorContains(t, err, "Failed to reach target my-server/users")
-	assert.Nil(t, results)
+	assert.Nil(t, report.Results)
 }

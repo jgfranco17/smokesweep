@@ -103,3 +103,32 @@ func TestRunCommandFailFast(t *testing.T) {
 	output := ExecuteTestCommand(GetRunCommand, writePath, "--fail-fast")
 	assert.ErrorContains(t, output.Error, "expected HTTP 200 but got 500")
 }
+
+func TestPingCommandSuccess(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	output := ExecuteTestCommand(GetPingCommand, server.URL)
+	assert.NoError(t, output.Error, "Unexpected error while executing ping command")
+}
+
+func TestPingCommandServerError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1")
+	assert.NoError(t, output.Error, "Unexpected error while executing ping command")
+}
+
+func TestPingCommandUnreachable(t *testing.T) {
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+
+	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1")
+	assert.ErrorContains(t, output.Error, "Failed to reach target")
+}

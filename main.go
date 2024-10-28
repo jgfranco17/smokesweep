@@ -24,8 +24,8 @@ func init() {
 
 func main() {
 	commandsList := []*cobra.Command{
-		core.GetVersionCommand(version),
 		core.GetRunCommand(),
+		core.GetPingCommand(),
 	}
 	command := core.NewCommandRegistry(projectName, projectDescription, version)
 	command.RegisterCommands(commandsList)

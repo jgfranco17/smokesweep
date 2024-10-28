@@ -45,7 +45,10 @@ func GetRunCommand() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("Error running tests: %w", err)
 			}
-			report.SummarizeResults()
+			err = report.SummarizeResults()
+			if err != nil {
+				return fmt.Errorf("Error summarizing test results: %w", err)
+			}
 			return nil
 		},
 	}

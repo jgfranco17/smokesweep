@@ -11,6 +11,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+/*
+Description: Runs the provided test suite and returns the test report.
+
+[IN] conf (*config.TestConfig): A pointer to the test suite configuration
+
+[OUT] TestReport: A test report containing the test results
+
+[OUT] error: Any error occurred during the test run
+*/
 func RunTests(conf *config.TestConfig, failFast bool) (TestReport, error) {
 	var results []TestResult
 	log.Infof("Running %d tests [URL: %s]\n", len(conf.Endpoints), conf.URL)

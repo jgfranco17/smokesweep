@@ -21,6 +21,11 @@ type TestReport struct {
 	Results   []TestResult
 }
 
+/*
+Description: Prints a summary of the test results with colorized output.
+
+[OUT] error: Any error occurred during the summary printing
+*/
 func (tr *TestReport) SummarizeResults() error {
 	if len(tr.Results) < 1 {
 		return fmt.Errorf("No test results to print.")

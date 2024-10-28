@@ -40,6 +40,7 @@ jobs:
 
       - name: Install Github CLI
         run: |
+          sudo apt-get update
           sudo apt-get install gh
 
       - name: Build binary
@@ -47,18 +48,22 @@ jobs:
         run: |
           just tidy
           go mod download all
-          CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=${VERSION}" -o ./smokesweep main.go
+          mkdir -p builds/linux-amd64 builds/darwin-amd64
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-X main.version=${VERSION}" -o ./builds/linux-amd64/smokesweep main.go
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-X main.version=${VERSION}" -o ./builds/darwin-amd64/smokesweep main.go
 
-      - name: Upload binary
-        id: upload-binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: smokesweep-bin
-          path: smokesweep
+      - name: Create tarball
+        run: |
+          mkdir -p release
+          tar -czvf release/smokesweep-${{ env.VERSION }}-linux-amd64.tar.gz ./builds/linux-amd64/smokesweep
+          tar -czvf release/smokesweep-${{ env.VERSION }}-darwin-amd64.tar.gz ./builds/darwin-amd64/smokesweep
 
-      - name: Create ${{ env.VERSION }} release
+      - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.USER_GITHUB_TOKEN }}
           VERSION: ${{ env.VERSION }}
         run: |
-          gh release create "${{ env.VERSION }}" --notes-file ".github/release/${{ env.VERSION }}.md" smokesweep
+          gh release create "${{ env.VERSION }}" \
+            release/smokesweep-${{ env.VERSION }}-linux-amd64.tar.gz \
+            release/smokesweep-${{ env.VERSION }}-darwin-amd64.tar.gz \
+            --notes-file ".github/release/${{ env.VERSION }}.md"

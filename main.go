@@ -14,7 +14,7 @@ const (
 )
 
 var (
-	version string = "0.0.0"
+	version string = "0.0.0-dev.1"
 )
 
 func init() {

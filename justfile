@@ -11,6 +11,12 @@ test:
     go clean -testcache
     go test -cover ./cli/...
 
+test-report:
+    @echo "Running {{ PROJECT_NAME }} unit tests with reporting!"
+    go clean -testcache
+    go test -cover -json ./cli/... | go-test-report -o smokesweep-test-report.html -t "SmokeSweep Test Report" -g 1
+    xdg-open smokesweep-test-report.html
+
 # Sync Go modules
 tidy:
     go mod tidy

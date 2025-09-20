@@ -70,7 +70,7 @@ func TestRunTestsFailFast(t *testing.T) {
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
 	report, err := RunTests(mockConfig, true)
-	assert.Error(t, err)
+	assert.ErrorContains(t, err, "expected HTTP 200 but got 500")
 	assert.Nil(t, report.Results)
 }
 
@@ -93,6 +93,6 @@ func TestRunTestsUnreachableFailFast(t *testing.T) {
 	}
 	mockConfig := newMockConfig("my-server", endpoints)
 	report, err := RunTests(mockConfig, true)
-	assert.Error(t, err, "Failed to reach target my-server/users")
+	assert.ErrorContains(t, err, "Failed to reach target my-server/users")
 	assert.Nil(t, report.Results)
 }

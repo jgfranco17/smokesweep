@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"cli/config"
+	"github.com/jgfranco17/smokesweep/config"
 )
 
 var (

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"cli/config"
-	"cli/outputs"
+	"github.com/jgfranco17/smokesweep/config"
+	"github.com/jgfranco17/smokesweep/outputs"
 
 	log "github.com/sirupsen/logrus"
 )

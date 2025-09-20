@@ -2,12 +2,13 @@ package core
 
 import (
 	"bytes"
-	"cli/config"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/jgfranco17/smokesweep/config"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"

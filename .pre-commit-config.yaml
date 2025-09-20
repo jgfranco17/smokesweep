@@ -52,7 +52,7 @@ repos:
       - id: go-test
         name: go-test
         language: system
-        entry: go test --cover ./cli/...
+        entry: go test --cover ./...
         pass_filenames: false
 
   # Security

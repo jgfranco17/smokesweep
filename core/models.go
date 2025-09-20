@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"cli/outputs"
+	"github.com/jgfranco17/smokesweep/outputs"
 )
 
 type TestResult struct {

@@ -39,5 +39,14 @@ jobs:
       - name: Build binary
         run: |
           just tidy
-          go mod download all
-          CGO_ENABLED=0 GOOS=linux go build -o ./smokesweep main.go
+          just build
+
+      - name: Run binary
+        run: |
+          ./smokesweep --help
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: smokesweep-linux-amd64
+          path: ./smokesweep

@@ -64,7 +64,7 @@ func TestRunCommandSuccess(t *testing.T) {
 	endpoints := []config.Endpoint{
 		{Path: "/users", ExpectedStatus: 200},
 	}
-	mockConfig := config.TestConfig{
+	mockConfig := config.TestSuite{
 		URL:       server.URL,
 		Endpoints: endpoints,
 	}
@@ -80,7 +80,7 @@ func TestRunCommandSuccess(t *testing.T) {
 
 func TestRunCommandInvalidConfig(t *testing.T) {
 	output := ExecuteTestCommand(GetRunCommand, "non-existent.yaml")
-	assert.ErrorContains(t, output.Error, "Error loading config file: open non-existent.yaml: no such file or directory")
+	assert.ErrorContains(t, output.Error, "no such file or directory")
 }
 
 func TestRunCommandFailFast(t *testing.T) {
@@ -91,7 +91,7 @@ func TestRunCommandFailFast(t *testing.T) {
 	endpoints := []config.Endpoint{
 		{Path: "/some-endpoint", ExpectedStatus: 200},
 	}
-	mockConfig := config.TestConfig{
+	mockConfig := config.TestSuite{
 		URL:       server.URL,
 		Endpoints: endpoints,
 	}

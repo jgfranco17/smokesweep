@@ -20,7 +20,7 @@ Description: Runs the provided test suite and returns the test report.
 
 [OUT] error: Any error occurred during the test run
 */
-func RunTests(conf *config.TestConfig, failFast bool) (TestReport, error) {
+func RunTests(conf *config.TestSuite, failFast bool) (TestReport, error) {
 	var results []TestResult
 	log.Infof("Running %d tests [URL: %s]\n", len(conf.Endpoints), conf.URL)
 

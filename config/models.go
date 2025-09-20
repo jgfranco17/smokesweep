@@ -6,20 +6,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// TestConfig represents the top-level structure of the smoke test suite configuration file.
-type TestConfig struct {
+// TestSuite represents the top-level structure of the smoke test suite
+// configuration file.
+type TestSuite struct {
 	URL       string     `yaml:"url"`
 	Endpoints []Endpoint `yaml:"endpoints"`
 }
 
-/*
-Description: Runs the provided test suite and returns the test report.
-
-[IN] filePath (string): File path to the suite configuration file
-
-[OUT] error: Any error occurred during the test run
-*/
-func (tc *TestConfig) Write(filePath string) error {
+// Write writes the test suite configuration to a file.
+func (tc *TestSuite) Write(filePath string) error {
 	data, err := yaml.Marshal(tc)
 	if err != nil {
 		return err

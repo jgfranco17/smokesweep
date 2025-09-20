@@ -17,8 +17,8 @@ type TestEntry struct {
 	shouldError  bool
 }
 
-func newMockConfig(url string, endpoints []config.Endpoint) *config.TestConfig {
-	return &config.TestConfig{
+func newMockConfig(url string, endpoints []config.Endpoint) *config.TestSuite {
+	return &config.TestSuite{
 		URL:       url,
 		Endpoints: endpoints,
 	}

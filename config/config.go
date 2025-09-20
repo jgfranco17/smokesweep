@@ -1,27 +1,24 @@
+// Package config provides functionality for loading and parsing the test suite
+// configuration file.
 package config
 
 import (
+	"fmt"
 	"io"
-	"os"
 
 	"gopkg.in/yaml.v3"
 )
 
-func LoadTestSuiteConfig(filepath string) (*TestConfig, error) {
-	file, err := os.Open(filepath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	data, err := io.ReadAll(file)
+// Load loads the test suite configuration from the provided reader.
+func Load(reader io.Reader) (*TestSuite, error) {
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	var config TestConfig
+	var config TestSuite
 	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error parsing config file: %w", err)
 	}
 	return &config, nil
 }

@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -23,12 +24,19 @@ func GetRunCommand() *cobra.Command {
 			if len(args) != 1 {
 				return fmt.Errorf("Not enough arguments, expected 1 but got %d", len(args))
 			}
-			configFile := args[0]
-			testConfigs, err := config.LoadTestSuiteConfig(configFile)
+
+			configFilePath := args[0]
+			file, err := os.Open(configFilePath)
+			if err != nil {
+				return fmt.Errorf("Error opening config file: %w", err)
+			}
+			defer file.Close()
+
+			testConfigs, err := config.Load(file)
 			if err != nil {
 				return fmt.Errorf("Error loading config file: %w", err)
 			}
-			log.Debugf("Using config file: %s", configFile)
+			log.Debugf("Using config file: %s", configFilePath)
 			report, err := RunTests(testConfigs, failFast)
 			if err != nil {
 				return fmt.Errorf("Error running tests: %w", err)

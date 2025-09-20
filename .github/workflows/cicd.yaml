@@ -11,6 +11,7 @@ on:
 
 jobs:
   test:
+    name: Run unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -21,9 +22,11 @@ jobs:
 
       - name: Run tests
         run: |
-          just test
+          go clean -testcache
+          go test -v -cover ./...
 
   build:
+    name: Build
     runs-on: ubuntu-latest
     needs: test
     steps:

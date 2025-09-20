@@ -9,22 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	stringToLogLevel map[string]logrus.Level
-)
-
-func init() {
-	stringToLogLevel = map[string]logrus.Level{
-		"DEBUG": logrus.DebugLevel,
-		"INFO":  logrus.InfoLevel,
-		"WARN":  logrus.WarnLevel,
-		"ERROR": logrus.ErrorLevel,
-		"PANIC": logrus.PanicLevel,
-		"FATAL": logrus.FatalLevel,
-		"TRACE": logrus.TraceLevel,
-	}
-}
-
 type CustomFormatter struct{}
 
 func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {

@@ -93,6 +93,6 @@ func TestRunTestsUnreachableFailFast(t *testing.T) {
 	}
 	mockConfig := newMockConfig("my-server", endpoints)
 	report, err := RunTests(mockConfig, true)
-	assert.ErrorContains(t, err, "Failed to reach target my-server/users")
+	assert.ErrorContains(t, err, "failed to reach target my-server/users")
 	assert.Nil(t, report.Results)
 }

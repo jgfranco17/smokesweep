@@ -23,7 +23,7 @@ jobs:
       - name: Run tests
         run: |
           go clean -testcache
-          go test -v -cover ./...
+          go test -v -cover -race ./...
 
   build:
     name: Build

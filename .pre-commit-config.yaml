@@ -41,19 +41,14 @@ repos:
         args: [-s]
         exclude: ^.github/
 
+  # Go standards and linting
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
       - id: go-fmt
-      - id: go-mod-tidy
-
-  - repo: local
-    hooks:
-      - id: go-test
-        name: go-test
-        language: system
-        entry: go test --cover ./...
-        pass_filenames: false
+      - id: go-imports
+      - id: golangci-lint
+      - id: go-unit-tests
 
   # Security
   - repo: https://github.com/Yelp/detect-secrets

@@ -36,6 +36,13 @@ build:
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-X main.version=${VERSION}" -o ./smokesweep main.go
     echo "Built binary for {{ PROJECT_NAME }} ${VERSION} successfully!"
 
+# Update the project dependencies
+update-deps:
+    @echo "Updating {{ PROJECT_NAME }} dependencies..."
+    go get -u ./...
+    go mod tidy
+    @echo "Updated dependencies for {{ PROJECT_NAME }} successfully!"
+
 # Build Docker image
 build-docker:
     docker build -t smokesweep:dev .

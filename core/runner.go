@@ -1,25 +1,26 @@
 package core
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/jgfranco17/smokesweep/config"
+	"github.com/jgfranco17/smokesweep/logging"
 	"github.com/jgfranco17/smokesweep/outputs"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // RunTests executes the provided test suite and returns the test report.
-func RunTests(conf *config.TestSuite, failFast bool) (TestReport, error) {
+func RunTests(ctx context.Context, conf *config.TestSuite, failFast bool) (TestReport, error) {
+	logger := logging.FromContext(ctx)
 	var results []TestResult
-	log.Infof("Running %d tests [URL: %s]\n", len(conf.Endpoints), conf.URL)
+	logger.Infof("Running %d tests [URL: %s]\n", len(conf.Endpoints), conf.URL)
 
 	testRunStartTime := time.Now()
 	for _, endpoint := range conf.Endpoints {
 		target := fmt.Sprintf("%s%s", conf.URL, endpoint.Path)
-		log.Debugf("Pinging %s", target)
+		logger.Debugf("Pinging %s", target)
 		start := time.Now()
 		resp, err := http.Get(target)
 		duration := time.Since(start)
@@ -62,12 +63,15 @@ Description: Ping a provided URL for liveness.
 
 [OUT] error: Any error occurred during the test run
 */
-func PingUrl(url string, timeoutSeconds int) error {
+func PingUrl(ctx context.Context, url string, timeoutSeconds int) error {
+	logger := logging.FromContext(ctx)
+
 	client := &http.Client{
 		Timeout: time.Duration(timeoutSeconds) * time.Second,
 	}
+
 	start := time.Now()
-	log.Debugf("Checking URL %s for liveness", url)
+	logger.Debugf("Checking URL %s for liveness", url)
 	resp, err := client.Head(url)
 	duration := time.Since(start)
 	if err != nil {

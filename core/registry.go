@@ -1,12 +1,11 @@
 package core
 
 import (
+	"context"
+
+	"github.com/jgfranco17/smokesweep/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-)
-
-var (
-	verbosity int
 )
 
 type CommandRegistry struct {
@@ -22,16 +21,20 @@ func NewCommandRegistry(name string, description string, version string) *Comman
 		Short:   description,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			verbosity, _ := cmd.Flags().GetCount("verbose")
+			var level logrus.Level
 			switch verbosity {
 			case 1:
-				logrus.SetLevel(logrus.InfoLevel)
+				level = logrus.InfoLevel
 			case 2:
-				logrus.SetLevel(logrus.DebugLevel)
+				level = logrus.DebugLevel
 			case 3:
-				logrus.SetLevel(logrus.TraceLevel)
+				level = logrus.TraceLevel
 			default:
-				logrus.SetLevel(logrus.WarnLevel)
+				level = logrus.WarnLevel
 			}
+			logger := logging.New(cmd.ErrOrStderr(), level)
+			ctx := logging.ApplyToContext(context.TODO(), logger)
+			cmd.SetContext(ctx)
 		},
 	}
 	newRegistry := &CommandRegistry{
@@ -51,5 +54,6 @@ func (cr *CommandRegistry) RegisterCommands(commands []*cobra.Command) {
 
 // Execute executes the root command
 func (cr *CommandRegistry) Execute() error {
-	return cr.rootCmd.Execute()
+	ctx := context.TODO()
+	return cr.rootCmd.ExecuteContext(ctx)
 }

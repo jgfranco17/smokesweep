@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -9,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/jgfranco17/smokesweep/config"
+	"github.com/jgfranco17/smokesweep/logging"
+	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -42,6 +45,10 @@ func ExecuteTestCommand(cmdGetter CliCommandFunction, args ...string) CliRunResu
 	cmd.SetOut(buf)
 	cmd.SetErr(buf)
 	cmd.SetArgs(args)
+
+	loggerForTests := logging.New(os.Stderr, logrus.WarnLevel)
+	ctx := logging.ApplyToContext(context.Background(), loggerForTests)
+	cmd.SetContext(ctx)
 
 	_, err := cmd.ExecuteC()
 	return CliRunResult{

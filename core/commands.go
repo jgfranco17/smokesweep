@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/jgfranco17/smokesweep/config"
+	"github.com/jgfranco17/smokesweep/logging"
 )
 
 var (
@@ -21,6 +21,7 @@ func GetRunCommand() *cobra.Command {
 		Long:  "Run the smoke tests using the config file provided.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			logger := logging.FromContext(cmd.Context())
 			configFilePath := args[0]
 			file, err := os.Open(configFilePath)
 			if err != nil {
@@ -32,8 +33,8 @@ func GetRunCommand() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("error loading config file: %w", err)
 			}
-			log.Debugf("Using config file: %s", configFilePath)
-			report, err := RunTests(testConfigs, failFast)
+			logger.Debugf("Using config file: %s", configFilePath)
+			report, err := RunTests(cmd.Context(), testConfigs, failFast)
 			if err != nil {
 				return fmt.Errorf("error running tests: %w", err)
 			}
@@ -56,9 +57,10 @@ func GetPingCommand() *cobra.Command {
 		Long:  "Check if a target URL is live and responds with a 2xx status code",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			logger := logging.FromContext(cmd.Context())
 			target := args[0]
-			if err := PingUrl(target, timeout); err != nil {
-				log.Errorf("Ping failed: %v", err)
+			if err := PingUrl(cmd.Context(), target, timeout); err != nil {
+				logger.Errorf("Ping failed: %v", err)
 				return err
 			}
 			return nil

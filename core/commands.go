@@ -3,11 +3,14 @@ package core
 import (
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/jgfranco17/smokesweep/config"
 	"github.com/jgfranco17/smokesweep/logging"
+	"github.com/jgfranco17/smokesweep/runner"
 )
 
 var (
@@ -22,6 +25,7 @@ func GetRunCommand() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger := logging.FromContext(cmd.Context())
+
 			configFilePath := args[0]
 			file, err := os.Open(configFilePath)
 			if err != nil {
@@ -33,13 +37,16 @@ func GetRunCommand() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("error loading config file: %w", err)
 			}
-			logger.Debugf("Using config file: %s", configFilePath)
-			report, err := RunTests(cmd.Context(), testConfigs, failFast)
+			logger.WithFields(
+				logrus.Fields{
+					"config": configFilePath,
+				},
+			).Debug("Config file loaded successfully")
+			report, err := runner.RunTests(cmd.Context(), testConfigs, failFast)
 			if err != nil {
 				return fmt.Errorf("error running tests: %w", err)
 			}
-			err = report.SummarizeResults()
-			if err != nil {
+			if err := report.SummarizeResults(); err != nil {
 				return fmt.Errorf("error summarizing test results: %w", err)
 			}
 			return nil
@@ -50,7 +57,7 @@ func GetRunCommand() *cobra.Command {
 }
 
 func GetPingCommand() *cobra.Command {
-	var timeout int
+	var timeout time.Duration
 	cmd := &cobra.Command{
 		Use:   "ping",
 		Short: "Ping a target URL",
@@ -59,13 +66,19 @@ func GetPingCommand() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger := logging.FromContext(cmd.Context())
 			target := args[0]
-			if err := PingUrl(cmd.Context(), target, timeout); err != nil {
-				logger.Errorf("Ping failed: %v", err)
+			if err := runner.PingUrl(cmd.Context(), target, timeout); err != nil {
+				logger.WithFields(
+					logrus.Fields{
+						"target": target,
+						"error":  err.Error(),
+					},
+				).Error("Ping failed", err)
 				return err
 			}
 			return nil
 		},
 	}
-	cmd.Flags().IntVarP(&timeout, "timeout", "t", 5, "Timeout duration (in seconds) for the ping request, default is 5s")
+	defaultTimeout := 5 * time.Second
+	cmd.Flags().DurationVarP(&timeout, "timeout", "t", defaultTimeout, "Timeout duration (in seconds) for the ping request, default is 5s")
 	return cmd
 }

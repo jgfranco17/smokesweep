@@ -128,7 +128,7 @@ func TestPingCommandServerError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1")
+	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1s")
 	assert.NoError(t, output.Error, "unexpected error while executing ping command")
 }
 
@@ -137,6 +137,6 @@ func TestPingCommandUnreachable(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}))
 
-	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1")
+	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1s")
 	assert.ErrorContains(t, output.Error, "failed to reach target")
 }

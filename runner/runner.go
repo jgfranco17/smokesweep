@@ -1,4 +1,4 @@
-package core
+package runner
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/jgfranco17/smokesweep/config"
 	"github.com/jgfranco17/smokesweep/logging"
 	"github.com/jgfranco17/smokesweep/outputs"
+	"github.com/sirupsen/logrus"
 )
 
 // RunTests executes the provided test suite and returns the test report.
@@ -63,15 +64,19 @@ Description: Ping a provided URL for liveness.
 
 [OUT] error: Any error occurred during the test run
 */
-func PingUrl(ctx context.Context, url string, timeoutSeconds int) error {
-	logger := logging.FromContext(ctx)
-
+func PingUrl(ctx context.Context, url string, timeout time.Duration) error {
+	logger := logging.FromContext(ctx).WithFields(
+		logrus.Fields{
+			"url":     url,
+			"timeout": timeout,
+		},
+	)
 	client := &http.Client{
-		Timeout: time.Duration(timeoutSeconds) * time.Second,
+		Timeout: timeout,
 	}
 
 	start := time.Now()
-	logger.Debugf("Checking URL %s for liveness", url)
+	logger.Debug("Checking URL for liveness")
 	resp, err := client.Head(url)
 	duration := time.Since(start)
 	if err != nil {

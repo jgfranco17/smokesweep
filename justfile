@@ -6,8 +6,8 @@ default:
     @just --list --unsorted
 
 # Run the CLI
-smokesweep:
-    @go run .
+smokesweep *args:
+    @go run . {{ args }}
 
 # Execute unit tests
 test:

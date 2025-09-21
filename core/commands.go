@@ -2,11 +2,12 @@ package core
 
 import (
 	"fmt"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"cli/config"
+	"github.com/jgfranco17/smokesweep/config"
 )
 
 var (
@@ -20,22 +21,25 @@ func GetRunCommand() *cobra.Command {
 		Long:  "Run the smoke tests using the config file provided.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return fmt.Errorf("Not enough arguments, expected 1 but got %d", len(args))
-			}
-			configFile := args[0]
-			testConfigs, err := config.LoadTestSuiteConfig(configFile)
+			configFilePath := args[0]
+			file, err := os.Open(configFilePath)
 			if err != nil {
-				return fmt.Errorf("Error loading config file: %w", err)
+				return fmt.Errorf("error opening config file: %w", err)
 			}
-			log.Debugf("Using config file: %s", configFile)
+			defer file.Close()
+
+			testConfigs, err := config.Load(file)
+			if err != nil {
+				return fmt.Errorf("error loading config file: %w", err)
+			}
+			log.Debugf("Using config file: %s", configFilePath)
 			report, err := RunTests(testConfigs, failFast)
 			if err != nil {
-				return fmt.Errorf("Error running tests: %w", err)
+				return fmt.Errorf("error running tests: %w", err)
 			}
 			err = report.SummarizeResults()
 			if err != nil {
-				return fmt.Errorf("Error summarizing test results: %w", err)
+				return fmt.Errorf("error summarizing test results: %w", err)
 			}
 			return nil
 		},
@@ -52,9 +56,6 @@ func GetPingCommand() *cobra.Command {
 		Long:  "Check if a target URL is live and responds with a 2xx status code",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) != 1 {
-				return fmt.Errorf("Not enough arguments, expected 1 but got %d", len(args))
-			}
 			target := args[0]
 			if err := PingUrl(target, timeout); err != nil {
 				log.Errorf("Ping failed: %v", err)

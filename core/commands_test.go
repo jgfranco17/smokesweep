@@ -2,12 +2,13 @@ package core
 
 import (
 	"bytes"
-	"cli/config"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/jgfranco17/smokesweep/config"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,7 @@ func TestRunCommandSuccess(t *testing.T) {
 	endpoints := []config.Endpoint{
 		{Path: "/users", ExpectedStatus: 200},
 	}
-	mockConfig := config.TestConfig{
+	mockConfig := config.TestSuite{
 		URL:       server.URL,
 		Endpoints: endpoints,
 	}
@@ -79,7 +80,7 @@ func TestRunCommandSuccess(t *testing.T) {
 
 func TestRunCommandInvalidConfig(t *testing.T) {
 	output := ExecuteTestCommand(GetRunCommand, "non-existent.yaml")
-	assert.ErrorContains(t, output.Error, "Error loading config file: open non-existent.yaml: no such file or directory")
+	assert.ErrorContains(t, output.Error, "no such file or directory")
 }
 
 func TestRunCommandFailFast(t *testing.T) {
@@ -90,7 +91,7 @@ func TestRunCommandFailFast(t *testing.T) {
 	endpoints := []config.Endpoint{
 		{Path: "/some-endpoint", ExpectedStatus: 200},
 	}
-	mockConfig := config.TestConfig{
+	mockConfig := config.TestSuite{
 		URL:       server.URL,
 		Endpoints: endpoints,
 	}
@@ -121,7 +122,7 @@ func TestPingCommandServerError(t *testing.T) {
 	defer server.Close()
 
 	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1")
-	assert.NoError(t, output.Error, "Unexpected error while executing ping command")
+	assert.NoError(t, output.Error, "unexpected error while executing ping command")
 }
 
 func TestPingCommandUnreachable(t *testing.T) {
@@ -130,5 +131,5 @@ func TestPingCommandUnreachable(t *testing.T) {
 	}))
 
 	output := ExecuteTestCommand(GetPingCommand, server.URL, "--timeout", "1")
-	assert.ErrorContains(t, output.Error, "Failed to reach target")
+	assert.ErrorContains(t, output.Error, "failed to reach target")
 }

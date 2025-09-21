@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"cli/outputs"
+	"github.com/jgfranco17/smokesweep/outputs"
 )
 
 type TestResult struct {
@@ -28,7 +28,7 @@ Description: Prints a summary of the test results with colorized output.
 */
 func (tr *TestReport) SummarizeResults() error {
 	if len(tr.Results) < 1 {
-		return fmt.Errorf("No test results to print.")
+		return fmt.Errorf("no test results to print.")
 	}
 	fmt.Println("------------------------------")
 	for _, result := range tr.Results {

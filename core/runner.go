@@ -5,22 +5,14 @@ import (
 	"net/http"
 	"time"
 
-	"cli/config"
-	"cli/outputs"
+	"github.com/jgfranco17/smokesweep/config"
+	"github.com/jgfranco17/smokesweep/outputs"
 
 	log "github.com/sirupsen/logrus"
 )
 
-/*
-Description: Runs the provided test suite and returns the test report.
-
-[IN] conf (*config.TestConfig): A pointer to the test suite configuration
-
-[OUT] TestReport: A test report containing the test results
-
-[OUT] error: Any error occurred during the test run
-*/
-func RunTests(conf *config.TestConfig, failFast bool) (TestReport, error) {
+// RunTests executes the provided test suite and returns the test report.
+func RunTests(conf *config.TestSuite, failFast bool) (TestReport, error) {
 	var results []TestResult
 	log.Infof("Running %d tests [URL: %s]\n", len(conf.Endpoints), conf.URL)
 
@@ -34,13 +26,13 @@ func RunTests(conf *config.TestConfig, failFast bool) (TestReport, error) {
 		if err != nil {
 			outputs.PrintColoredMessage("red", "UNREACHABLE", "Failed to reach target %s", target)
 			if failFast {
-				return TestReport{}, fmt.Errorf("Failed to reach target %s: %w", target, err)
+				return TestReport{}, fmt.Errorf("failed to reach target %s: %w", target, err)
 			}
 			continue
 		}
 		defer resp.Body.Close()
 		if failFast && resp.StatusCode != endpoint.ExpectedStatus {
-			return TestReport{}, fmt.Errorf("Target %s expected HTTP %d but got %d", target, endpoint.ExpectedStatus, resp.StatusCode)
+			return TestReport{}, fmt.Errorf("target %s expected HTTP %d but got %d", target, endpoint.ExpectedStatus, resp.StatusCode)
 		}
 		result := TestResult{
 			Target:         target,
@@ -79,7 +71,7 @@ func PingUrl(url string, timeoutSeconds int) error {
 	resp, err := client.Head(url)
 	duration := time.Since(start)
 	if err != nil {
-		return fmt.Errorf("Failed to reach target %s: %w", url, err)
+		return fmt.Errorf("failed to reach target %s: %w", url, err)
 	}
 	defer resp.Body.Close()
 

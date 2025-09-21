@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"cli/config"
+	"github.com/jgfranco17/smokesweep/config"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -17,8 +17,8 @@ type TestEntry struct {
 	shouldError  bool
 }
 
-func newMockConfig(url string, endpoints []config.Endpoint) *config.TestConfig {
-	return &config.TestConfig{
+func newMockConfig(url string, endpoints []config.Endpoint) *config.TestSuite {
+	return &config.TestSuite{
 		URL:       url,
 		Endpoints: endpoints,
 	}
@@ -70,7 +70,7 @@ func TestRunTestsFailFast(t *testing.T) {
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
 	report, err := RunTests(mockConfig, true)
-	assert.Error(t, err)
+	assert.ErrorContains(t, err, "expected HTTP 200 but got 500")
 	assert.Nil(t, report.Results)
 }
 
@@ -93,6 +93,6 @@ func TestRunTestsUnreachableFailFast(t *testing.T) {
 	}
 	mockConfig := newMockConfig("my-server", endpoints)
 	report, err := RunTests(mockConfig, true)
-	assert.ErrorContains(t, err, "Failed to reach target my-server/users")
+	assert.ErrorContains(t, err, "failed to reach target my-server/users")
 	assert.Nil(t, report.Results)
 }

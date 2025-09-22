@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/jgfranco17/smokesweep/config"
@@ -12,8 +14,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// RunTests executes the provided test suite and returns the test report.
-func RunTests(ctx context.Context, conf *config.TestSuite, failFast bool) (TestReport, error) {
+const (
+	DefaultConfigFile string = ".smokesweep.yaml"
+)
+
+// Execute runs the provided test suite and returns the test report.
+func Execute(ctx context.Context, conf *config.TestSuite, failFast bool) (TestReport, error) {
 	logger := logging.FromContext(ctx)
 	var results []TestResult
 	logger.WithFields(logrus.Fields{
@@ -23,7 +29,7 @@ func RunTests(ctx context.Context, conf *config.TestSuite, failFast bool) (TestR
 
 	testRunStartTime := time.Now()
 	for _, endpoint := range conf.Endpoints {
-		target := fmt.Sprintf("%s%s", conf.URL, endpoint.Path)
+		target := joinURL(conf.URL, endpoint.Path)
 		logger.WithFields(logrus.Fields{
 			"target": target,
 		}).Info("Pinging target")
@@ -60,16 +66,8 @@ func RunTests(ctx context.Context, conf *config.TestSuite, failFast bool) (TestR
 	}, nil
 }
 
-/*
-Description: Ping a provided URL for liveness.
-
-[IN] url (string): Target URL to ping
-
-[IN] timeoutSeconds (int): Timeout duration for HTTP client
-
-[OUT] error: Any error occurred during the test run
-*/
-func PingUrl(ctx context.Context, url string, timeout time.Duration) error {
+// PingURL make a simple GET request to a provided URL for liveness.
+func PingURL(ctx context.Context, url string, timeout time.Duration) error {
 	logger := logging.FromContext(ctx).WithFields(
 		logrus.Fields{
 			"url":     url,
@@ -98,4 +96,9 @@ func PingUrl(ctx context.Context, url string, timeout time.Duration) error {
 		outputs.PrintColoredMessage("red", "DOWN", "Target %s returned HTTP status %d", url, resp.StatusCode)
 	}
 	return nil
+}
+
+func joinURL(base string, paths ...string) string {
+	p := path.Join(paths...)
+	return fmt.Sprintf("%s/%s", strings.TrimRight(base, "/"), strings.TrimLeft(p, "/"))
 }

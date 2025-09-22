@@ -1,10 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/jgfranco17/smokesweep/core"
+	"github.com/jgfranco17/smokesweep/logging"
 )
 
 const (
@@ -32,8 +35,9 @@ func main() {
 	command := core.NewCommandRegistry(projectName, projectDescription, version)
 	command.RegisterCommands(commandsList)
 
+	logger := logging.New(os.Stderr, logrus.ErrorLevel)
 	err := command.Execute()
 	if err != nil {
-		logrus.Error(err.Error())
+		logger.Error(err.Error())
 	}
 }

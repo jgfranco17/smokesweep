@@ -3,7 +3,6 @@ package logging
 import (
 	"context"
 	"io"
-	"os"
 	"time"
 
 	"github.com/fatih/color"
@@ -35,8 +34,6 @@ func New(stream io.Writer, level logrus.Level) *logrus.Logger {
 	logger := logrus.New()
 	logger.SetOutput(stream)
 	logger.SetLevel(level)
-	shouldReportCaller := (level == logrus.TraceLevel) && (os.Getenv("SMOKESWEEP_REPORT_CALLER") == "true")
-	logger.SetReportCaller(shouldReportCaller)
 
 	logger.SetFormatter(&logrus.TextFormatter{
 		DisableColors:          false,

@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -77,39 +78,45 @@ func TestRunCommandSuccess(t *testing.T) {
 	}
 	temp := createTempDir(t)
 	defer os.RemoveAll(temp)
-	writePath := filepath.Join(temp, "config.yaml")
-	err := mockConfig.Write(writePath)
+	mockConfigFilePath := filepath.Join(temp, "config.yaml")
+	err := mockConfig.Write(mockConfigFilePath)
 	assert.NoError(t, err)
 
-	output := ExecuteTestCommand(GetRunCommand, writePath)
+	output := ExecuteTestCommand(GetRunCommand, "-f", mockConfigFilePath)
 	assert.NoError(t, output.Error, "Unexpected error while executing run command")
 }
 
 func TestRunCommandInvalidConfig(t *testing.T) {
-	output := ExecuteTestCommand(GetRunCommand, "non-existent.yaml")
+	output := ExecuteTestCommand(GetRunCommand, "-f", "non-existent.yaml")
 	assert.ErrorContains(t, output.Error, "no such file or directory")
 }
 
 func TestRunCommandFailFast(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-	}))
-	defer server.Close()
-	endpoints := []config.Endpoint{
-		{Path: "/some-endpoint", ExpectedStatus: 200},
-	}
-	mockConfig := config.TestSuite{
-		URL:       server.URL,
-		Endpoints: endpoints,
-	}
-	temp := createTempDir(t)
-	defer os.RemoveAll(temp)
-	writePath := filepath.Join(temp, "config.yaml")
-	err := mockConfig.Write(writePath)
-	assert.NoError(t, err)
+	flags := []string{"--fail-fast", "-x"}
+	for _, flag := range flags {
+		t.Run(fmt.Sprintf("Fail fast with %s", flag), func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			}))
+			defer server.Close()
 
-	output := ExecuteTestCommand(GetRunCommand, writePath, "--fail-fast")
-	assert.ErrorContains(t, output.Error, "expected HTTP 200 but got 500")
+			endpoints := []config.Endpoint{
+				{Path: "/some-endpoint", ExpectedStatus: 200},
+			}
+			mockConfig := config.TestSuite{
+				URL:       server.URL,
+				Endpoints: endpoints,
+			}
+			temp := createTempDir(t)
+			defer os.RemoveAll(temp)
+			writePath := filepath.Join(temp, "config.yaml")
+			err := mockConfig.Write(writePath)
+			assert.NoError(t, err)
+
+			output := ExecuteTestCommand(GetRunCommand, "-f", writePath, flag)
+			assert.ErrorContains(t, output.Error, "expected HTTP 200 but got 500")
+		})
+	}
 }
 
 func TestPingCommandSuccess(t *testing.T) {

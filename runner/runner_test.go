@@ -52,7 +52,7 @@ func TestRunTestsSuccess(t *testing.T) {
 		{Path: "/users", ExpectedStatus: 200},
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
-	report, err := RunTests(ctx, mockConfig, false)
+	report, err := Execute(ctx, mockConfig, false)
 	assert.NoError(t, err)
 	assert.Equal(t, len(endpoints), len(report.Results))
 	for i, result := range report.Results {
@@ -73,7 +73,7 @@ func TestRunTestsFailedCall(t *testing.T) {
 		{Path: "/users", ExpectedStatus: 200},
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
-	report, err := RunTests(ctx, mockConfig, false)
+	report, err := Execute(ctx, mockConfig, false)
 	assert.NoError(t, err)
 	assert.Equal(t, len(endpoints), len(report.Results))
 	for i, result := range report.Results {
@@ -94,7 +94,7 @@ func TestRunTestsFailFast(t *testing.T) {
 		{Path: "/users", ExpectedStatus: 200},
 	}
 	mockConfig := newMockConfig(server.URL, endpoints)
-	report, err := RunTests(ctx, mockConfig, true)
+	report, err := Execute(ctx, mockConfig, true)
 	assert.ErrorContains(t, err, "expected HTTP 200 but got 500")
 	assert.Nil(t, report.Results)
 }
@@ -106,7 +106,7 @@ func TestRunTestsUnreachable(t *testing.T) {
 		{Path: "/users", ExpectedStatus: http.StatusOK},
 	}
 	mockConfig := newMockConfig("my-server", endpoints)
-	report, err := RunTests(ctx, mockConfig, false)
+	report, err := Execute(ctx, mockConfig, false)
 	assert.NoError(t, err)
 	for i, result := range report.Results {
 		assert.Contains(t, result.Target, endpoints[i].Path)
@@ -121,7 +121,7 @@ func TestRunTestsUnreachableFailFast(t *testing.T) {
 		{Path: "/users", ExpectedStatus: http.StatusOK},
 	}
 	mockConfig := newMockConfig("my-server", endpoints)
-	report, err := RunTests(ctx, mockConfig, true)
+	report, err := Execute(ctx, mockConfig, true)
 	assert.ErrorContains(t, err, "failed to reach target my-server/users")
 	assert.Nil(t, report.Results)
 }

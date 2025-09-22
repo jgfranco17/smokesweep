@@ -1,24 +1,18 @@
 package logging
 
 import (
-	"fmt"
-	"strings"
+	"context"
+	"io"
+	"os"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 )
 
-type CustomFormatter struct{}
+type contextLogKey string
 
-func (f *CustomFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-	// Create a custom format for the log message
-	level := strings.ToUpper(entry.Level.String())
-	timestamp := entry.Time.Format(time.TimeOnly)
-	colorFunc := color.New(setOutputColorPerLevel(level)).SprintFunc()
-	logMessage := fmt.Sprintf("[%s][%s] %s\n", colorFunc(level), timestamp, entry.Message)
-	return []byte(logMessage), nil
-}
+const contextKey contextLogKey = "logger"
 
 func setOutputColorPerLevel(level string) color.Attribute {
 	var selectedColor color.Attribute
@@ -35,4 +29,39 @@ func setOutputColorPerLevel(level string) color.Attribute {
 		selectedColor = color.FgWhite
 	}
 	return selectedColor
+}
+
+func New(stream io.Writer, level logrus.Level) *logrus.Logger {
+	logger := logrus.New()
+	logger.SetOutput(stream)
+	logger.SetLevel(level)
+	shouldReportCaller := (level == logrus.TraceLevel) && (os.Getenv("SMOKESWEEP_REPORT_CALLER") == "true")
+	logger.SetReportCaller(shouldReportCaller)
+
+	logger.SetFormatter(&logrus.TextFormatter{
+		DisableColors:          false,
+		PadLevelText:           true,
+		QuoteEmptyFields:       true,
+		FullTimestamp:          true,
+		DisableSorting:         true,
+		DisableLevelTruncation: true,
+		TimestampFormat:        time.DateTime,
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "@timestamp",
+			logrus.FieldKeyLevel: "@level",
+			logrus.FieldKeyMsg:   "@message",
+		},
+	})
+	return logger
+}
+
+func ApplyToContext(ctx context.Context, logger *logrus.Logger) context.Context {
+	return context.WithValue(ctx, contextKey, logger)
+}
+
+func FromContext(ctx context.Context) *logrus.Logger {
+	if logger, ok := ctx.Value(contextKey).(*logrus.Logger); ok {
+		return logger
+	}
+	panic("no logger set in context")
 }

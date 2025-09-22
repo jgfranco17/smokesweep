@@ -1,9 +1,9 @@
 package logging
 
 import (
-	"strings"
+	"bytes"
+	"context"
 	"testing"
-	"time"
 
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
@@ -25,31 +25,16 @@ func TestSetLoggingLevelPerColor(t *testing.T) {
 	}
 }
 
-func TestCustomFormatterFormat(t *testing.T) {
-	// Create a CustomFormatter instance
-	formatter := &CustomFormatter{}
+func TestApplyToContext(t *testing.T) {
+	var buf bytes.Buffer
+	logger := New(&buf, logrus.TraceLevel)
+	ctx := ApplyToContext(context.Background(), logger)
+	assert.Equal(t, logger, FromContext(ctx))
+}
 
-	// Create a logrus Entry
-	entry := &logrus.Entry{
-		Logger:  logrus.New(),
-		Data:    logrus.Fields{},
-		Time:    time.Now(),
-		Level:   logrus.InfoLevel,
-		Message: "This is a test log message",
-	}
-
-	// Format the entry
-	output, err := formatter.Format(entry)
-	assert.NoError(t, err)
-	outputStr := string(output)
-	assert.Contains(t, outputStr, "INFO")
-	assert.Contains(t, outputStr, entry.Message)
-
-	expectedTimestamp := entry.Time.Format(time.TimeOnly)
-	assert.Contains(t, outputStr, expectedTimestamp)
-	colorFunc := color.New(color.FgGreen).SprintFunc()
-	assert.Contains(t, outputStr, colorFunc("INFO"))
-
-	// Ensure the string ends with a newline
-	assert.True(t, strings.HasSuffix(outputStr, "\n"), "Log message should end with a newline")
+func TestFromContext(t *testing.T) {
+	var buf bytes.Buffer
+	logger := New(&buf, logrus.TraceLevel)
+	ctx := ApplyToContext(context.Background(), logger)
+	assert.Equal(t, logger, FromContext(ctx))
 }

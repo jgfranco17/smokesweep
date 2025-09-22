@@ -1,11 +1,10 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/jgfranco17/smokesweep/core"
-	"github.com/jgfranco17/smokesweep/logging"
 )
 
 const (
@@ -18,8 +17,11 @@ var (
 )
 
 func init() {
-	log.SetReportCaller(true)
-	log.SetFormatter(&logging.CustomFormatter{})
+	logrus.SetReportCaller(true)
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:   true,
+		FullTimestamp: true,
+	})
 }
 
 func main() {
@@ -32,6 +34,6 @@ func main() {
 
 	err := command.Execute()
 	if err != nil {
-		log.Error(err.Error())
+		logrus.Error(err.Error())
 	}
 }

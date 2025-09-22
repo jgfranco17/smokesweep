@@ -16,12 +16,17 @@ import (
 func RunTests(ctx context.Context, conf *config.TestSuite, failFast bool) (TestReport, error) {
 	logger := logging.FromContext(ctx)
 	var results []TestResult
-	logger.Infof("Running %d tests [URL: %s]\n", len(conf.Endpoints), conf.URL)
+	logger.WithFields(logrus.Fields{
+		"count": len(conf.Endpoints),
+		"url":   conf.URL,
+	}).Info("Starting test execution")
 
 	testRunStartTime := time.Now()
 	for _, endpoint := range conf.Endpoints {
 		target := fmt.Sprintf("%s%s", conf.URL, endpoint.Path)
-		logger.Debugf("Pinging %s", target)
+		logger.WithFields(logrus.Fields{
+			"target": target,
+		}).Info("Pinging target")
 		start := time.Now()
 		resp, err := http.Get(target)
 		duration := time.Since(start)
@@ -76,7 +81,10 @@ func PingUrl(ctx context.Context, url string, timeout time.Duration) error {
 	}
 
 	start := time.Now()
-	logger.Debug("Checking URL for liveness")
+	logger.WithFields(logrus.Fields{
+		"url":     url,
+		"timeout": timeout,
+	}).Debug("Checking URL for liveness")
 	resp, err := client.Head(url)
 	duration := time.Since(start)
 	if err != nil {

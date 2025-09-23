@@ -13,7 +13,7 @@ smokesweep *args:
 test:
     @echo "Running {{ PROJECT_NAME }} unit tests!"
     go clean -testcache
-    go test -cover ./...
+    go test -cover -race ./...
 
 # Run tests with reporting
 test-report:

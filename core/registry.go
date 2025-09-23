@@ -16,9 +16,10 @@ type CommandRegistry struct {
 // NewCommandRegistry creates a new instance of CommandRegistry
 func NewCommandRegistry(name string, description string, version string) *CommandRegistry {
 	root := &cobra.Command{
-		Use:     name,
-		Version: version,
-		Short:   description,
+		Use:          name,
+		Version:      version,
+		Short:        description,
+		SilenceUsage: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			verbosity, _ := cmd.Flags().GetCount("verbose")
 			var level logrus.Level

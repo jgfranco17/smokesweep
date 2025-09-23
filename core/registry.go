@@ -8,6 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// CommandRegistry provides a wrapper over the Cobra command registry.
+// and its subcommands. This allows for easy registration of commands
+// and the management of the root command.
 type CommandRegistry struct {
 	rootCmd   *cobra.Command
 	verbosity int

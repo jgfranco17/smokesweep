@@ -8,17 +8,31 @@ import (
 )
 
 type TestResult struct {
-	Target         string
-	Duration       time.Duration
-	Timeout        *time.Duration
-	HttpStatus     int
+	// Target is the URL of the endpoint that was tested.
+	Target string
+
+	// Duration is the time it took to test the endpoint.
+	Duration time.Duration
+
+	// Timeout is the timeout for the test.
+	Timeout *time.Duration
+
+	// HttpStatus is the HTTP status code of the response.
+	HttpStatus int
+
+	// ExpectedStatus is the expected HTTP status code of the response.
 	ExpectedStatus int
-	Passed         bool
+
+	// Passed is true if the test passed, false otherwise.
+	Passed bool
 }
 
 type TestReport struct {
+	// Timestamp is the timestamp of the test.
 	Timestamp time.Time
-	Results   []TestResult
+
+	// Results is the list of test results.
+	Results []TestResult
 }
 
 /*

@@ -3,7 +3,7 @@ package core
 import (
 	"context"
 
-	"github.com/jgfranco17/smokesweep/logging"
+	"github.com/jgfranco17/dev-tooling-go/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,7 @@ func NewCommandRegistry(name string, description string, version string) *Comman
 				level = logrus.WarnLevel
 			}
 			logger := logging.New(cmd.ErrOrStderr(), level)
-			ctx := logging.ApplyToContext(context.TODO(), logger)
+			ctx := logging.WithContext(context.TODO(), logger)
 			cmd.SetContext(ctx)
 		},
 	}

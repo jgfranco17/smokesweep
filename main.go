@@ -6,8 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/jgfranco17/dev-tooling-go/logging"
 	"github.com/jgfranco17/smokesweep/core"
-	"github.com/jgfranco17/smokesweep/logging"
 )
 
 const (

@@ -8,8 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/jgfranco17/dev-tooling-go/logging"
 	"github.com/jgfranco17/smokesweep/config"
-	"github.com/jgfranco17/smokesweep/logging"
 	"github.com/jgfranco17/smokesweep/runner"
 )
 

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jgfranco17/dev-tooling-go/logging"
 	"github.com/jgfranco17/smokesweep/config"
-	"github.com/jgfranco17/smokesweep/logging"
 	"github.com/jgfranco17/smokesweep/outputs"
 	"github.com/sirupsen/logrus"
 )

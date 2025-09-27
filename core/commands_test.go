@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/jgfranco17/dev-tooling-go/logging"
 	"github.com/jgfranco17/smokesweep/config"
-	"github.com/jgfranco17/smokesweep/logging"
 	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
@@ -47,7 +47,7 @@ func ExecuteTestCommand(cmdGetter CliCommandFunction, args ...string) CliRunResu
 	cmd.SetArgs(args)
 
 	loggerForTests := logging.New(os.Stderr, logrus.WarnLevel)
-	ctx := logging.ApplyToContext(context.Background(), loggerForTests)
+	ctx := logging.WithContext(context.Background(), loggerForTests)
 	cmd.SetContext(ctx)
 
 	_, err := cmd.ExecuteC()

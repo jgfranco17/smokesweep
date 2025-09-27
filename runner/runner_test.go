@@ -8,8 +8,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jgfranco17/dev-tooling-go/logging"
 	"github.com/jgfranco17/smokesweep/config"
-	"github.com/jgfranco17/smokesweep/logging"
 	"github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +35,7 @@ func newContextWithLogger(t *testing.T) (context.Context, bytes.Buffer) {
 	var buf bytes.Buffer
 
 	logger := logging.New(os.Stdout, logrus.TraceLevel)
-	ctx = logging.ApplyToContext(ctx, logger)
+	ctx = logging.WithContext(ctx, logger)
 
 	return ctx, buf
 }

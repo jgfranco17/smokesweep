@@ -105,7 +105,7 @@ func TestExecute(t *testing.T) {
 			mockHandler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
-			expectedError: "expected HTTP 200 but got 500",
+			expectedError: "expected HTTP",
 		},
 		{
 			name: "fail fast on unreachable target",

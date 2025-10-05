@@ -43,7 +43,7 @@ dmypy.json
 
 # Local builds
 builds/
-release/
+dist/
 smokesweep
 
 # Test binary, built with `go test -c`

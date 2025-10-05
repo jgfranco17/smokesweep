@@ -41,7 +41,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Release
-        uses: jgfranco17/devops/shared-actions/create-release
+        uses: jgfranco17/devops/shared-actions/create-release@main
         with:
           spec-file: info.json
           git-token: ${{ secrets.GITHUB_TOKEN }}

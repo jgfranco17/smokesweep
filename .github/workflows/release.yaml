@@ -29,7 +29,7 @@ jobs:
     needs: verify
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Run setup
         uses: ./.github/actions/setup-workspace
@@ -40,40 +40,9 @@ jobs:
           export VERSION=$(jq -r .version info.json)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Install Github CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install gh
-
-      - name: Build binary
-        id: build-binary
-        run: |
-          just tidy
-          go mod download all
-          mkdir -p builds/linux-amd64 builds/darwin-amd64
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-            go build -ldflags="-X main.version=${VERSION}" \
-            -o ./builds/linux-amd64/smokesweep \
-            main.go
-          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
-            go build -ldflags="-X main.version=${VERSION}" \
-            -o ./builds/darwin-amd64/smokesweep \
-            main.go
-
-      - name: Create tarball
-        run: |
-          mkdir -p release
-          tar -czvf release/smokesweep-${{ env.VERSION }}-linux-amd64.tar.gz \
-            -C ./builds/linux-amd64 smokesweep
-          tar -czvf release/smokesweep-${{ env.VERSION }}-darwin-amd64.tar.gz \
-            -C ./builds/darwin-amd64 smokesweep
-
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ secrets.USER_GITHUB_TOKEN }}
-          VERSION: ${{ env.VERSION }}
-        run: |
-          gh release create "${{ env.VERSION }}" \
-            release/smokesweep-${{ env.VERSION }}-linux-amd64.tar.gz \
-            release/smokesweep-${{ env.VERSION }}-darwin-amd64.tar.gz \
-            --notes-file ".github/release/${{ env.VERSION }}.md"
+      - name: Release
+        uses: jgfranco17/devops/shared-actions/create-release
+        with:
+          spec-file: info.json
+          git-token: ${{ secrets.GITHUB_TOKEN }}
+          release-notes-dir: .github/release

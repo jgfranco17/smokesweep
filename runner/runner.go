@@ -19,15 +19,15 @@ const (
 	DefaultConfigFile string = ".smokesweep.yaml"
 )
 
-// TestJob represents a single test job to be executed
-type TestJob struct {
+// job represents a single test job to be executed
+type job struct {
 	Endpoint config.Endpoint
 	Target   string
 	Index    int
 }
 
-// TestResultWithIndex wraps TestResult with an index for ordering
-type TestResultWithIndex struct {
+// IndexedResult wraps TestResult with an index for ordering
+type IndexedResult struct {
 	Result TestResult
 	Index  int
 }
@@ -50,18 +50,16 @@ func Execute(ctx context.Context, conf *config.TestSuite, failFast bool) (TestRe
 		}, nil
 	}
 
-	// Create channels for job distribution and result collection
-	jobChan := make(chan TestJob, len(conf.Endpoints))
-	resultChan := make(chan TestResultWithIndex, len(conf.Endpoints))
+	jobChan := make(chan job, len(conf.Endpoints))
+	resultChan := make(chan IndexedResult, len(conf.Endpoints))
 	errorChan := make(chan error, len(conf.Endpoints))
 
-	// Create context with cancellation for fail-fast behavior
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// Start worker goroutines
+	//We limit max workers to prevent resource exhaustion.
 	numWorkers := len(conf.Endpoints)
-	if numWorkers > 10 { // Limit max workers to prevent resource exhaustion
+	if numWorkers > 10 {
 		numWorkers = 10
 	}
 
@@ -71,27 +69,24 @@ func Execute(ctx context.Context, conf *config.TestSuite, failFast bool) (TestRe
 		go worker(ctx, &wg, jobChan, resultChan, errorChan, logger, failFast)
 	}
 
-	// Send jobs to workers
 	go func() {
 		defer close(jobChan)
 		for i, endpoint := range conf.Endpoints {
 			target := joinURL(conf.URL, endpoint.Path)
 			select {
-			case jobChan <- TestJob{Endpoint: endpoint, Target: target, Index: i}:
+			case jobChan <- job{Endpoint: endpoint, Target: target, Index: i}:
 			case <-ctx.Done():
 				return
 			}
 		}
 	}()
 
-	// Wait for all workers to complete
 	go func() {
 		wg.Wait()
 		close(resultChan)
 		close(errorChan)
 	}()
 
-	// Collect results
 	results := make([]TestResult, len(conf.Endpoints))
 	completed := 0
 	hasError := false
@@ -116,7 +111,6 @@ func Execute(ctx context.Context, conf *config.TestSuite, failFast bool) (TestRe
 				cancel() // Cancel all remaining workers
 				return TestReport{}, err
 			}
-			// For non-fail-fast, we'll continue collecting results
 			completed++
 
 		case <-ctx.Done():
@@ -124,11 +118,10 @@ func Execute(ctx context.Context, conf *config.TestSuite, failFast bool) (TestRe
 		}
 	}
 
-	// For non-fail-fast mode with errors, filter out empty results
 	if hasError && !failFast {
 		filteredResults := make([]TestResult, 0, len(results))
 		for _, result := range results {
-			if result.Target != "" { // Only include results that were actually processed
+			if result.Target != "" {
 				filteredResults = append(filteredResults, result)
 			}
 		}
@@ -142,7 +135,7 @@ func Execute(ctx context.Context, conf *config.TestSuite, failFast bool) (TestRe
 }
 
 // worker processes test jobs from the job channel
-func worker(ctx context.Context, wg *sync.WaitGroup, jobChan <-chan TestJob, resultChan chan<- TestResultWithIndex, errorChan chan<- error, logger *logrus.Logger, failFast bool) {
+func worker(ctx context.Context, wg *sync.WaitGroup, jobChan <-chan job, resultChan chan<- IndexedResult, errorChan chan<- error, logger *logrus.Logger, failFast bool) {
 	defer wg.Done()
 
 	for {
@@ -173,7 +166,7 @@ func worker(ctx context.Context, wg *sync.WaitGroup, jobChan <-chan TestJob, res
 			}
 
 			select {
-			case resultChan <- TestResultWithIndex{Result: result, Index: job.Index}:
+			case resultChan <- IndexedResult{Result: result, Index: job.Index}:
 			case <-ctx.Done():
 				return
 			}
@@ -185,17 +178,17 @@ func worker(ctx context.Context, wg *sync.WaitGroup, jobChan <-chan TestJob, res
 }
 
 // executeSingleTest executes a single test and returns the result
-func executeSingleTest(ctx context.Context, job TestJob) (TestResult, error) {
+func executeSingleTest(ctx context.Context, j job) (TestResult, error) {
 	start := time.Now()
 
 	// Create HTTP client with timeout if specified
 	client := &http.Client{}
-	if job.Endpoint.Timeout != nil {
-		timeout := time.Duration(*job.Endpoint.Timeout) * time.Millisecond
+	if j.Endpoint.Timeout != nil {
+		timeout := time.Duration(*j.Endpoint.Timeout) * time.Millisecond
 		client.Timeout = timeout
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", job.Target, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", j.Target, nil)
 	if err != nil {
 		return TestResult{}, err
 	}
@@ -209,15 +202,15 @@ func executeSingleTest(ctx context.Context, job TestJob) (TestResult, error) {
 	duration := time.Since(start)
 
 	result := TestResult{
-		Target:         job.Target,
+		Target:         j.Target,
 		Duration:       duration,
-		ExpectedStatus: job.Endpoint.ExpectedStatus,
+		ExpectedStatus: j.Endpoint.ExpectedStatus,
 		HttpStatus:     resp.StatusCode,
-		Passed:         resp.StatusCode == job.Endpoint.ExpectedStatus,
+		Passed:         resp.StatusCode == j.Endpoint.ExpectedStatus,
 	}
 
-	if job.Endpoint.Timeout != nil {
-		d := time.Duration(*job.Endpoint.Timeout) * time.Millisecond
+	if j.Endpoint.Timeout != nil {
+		d := time.Duration(*j.Endpoint.Timeout) * time.Millisecond
 		result.Timeout = &d
 	}
 
